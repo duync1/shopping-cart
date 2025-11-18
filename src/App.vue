@@ -2,12 +2,11 @@
 import { ref, computed, provide, onMounted } from "vue";
 import ProductList from "./pages/ProductList.vue";
 
-import ProductDetail from "./components/ProductDetail.vue";
+import ProductDetail from "./pages/ProductDetail.vue";
 
 import Checkout from "./pages/Checkout.vue";
 import { ProductStoreKey, type Product } from "./types";
 
-// Centralized products state
 const products = ref<Product[]>([
   {
     id: 1,
@@ -46,7 +45,6 @@ const deleteProduct = (id: number) => {
   if (index !== -1) products.value.splice(index, 1);
 };
 
-// Provide products store to all child components
 provide(ProductStoreKey, {
   products,
   addProduct,
@@ -57,7 +55,6 @@ provide(ProductStoreKey, {
 const currentView = ref<"list" | "detail" | "checkout">("list");
 const selectedProduct = ref<Product | null>(null);
 
-// URL-based routing functions
 const updateURL = (view: string, productId?: number) => {
   const params = new URLSearchParams();
   params.set("view", view);
@@ -84,22 +81,17 @@ const parseURL = () => {
     }
   }
 
-  // Default to list if invalid
   currentView.value = "list";
   selectedProduct.value = null;
 }
 
-// Handle browser back/forward
 const handlePopState = () => {
   parseURL();
 }
 
-// Initialize on mount
 onMounted(() => {
-  // Parse initial URL
   parseURL();
 
-  // Listen to browser back/forward
   window.addEventListener("popstate", handlePopState);
 });
 
@@ -135,11 +127,9 @@ const showCheckout = () => {
 
 const handleCheckoutComplete = (orderData: any) => {
   console.log("Order completed:", orderData);
-  // Show success message or redirect
   alert(
     `Order completed successfully!\n\nThank you, ${orderData.customer.name}!\nYour order for ${orderData.product.name} has been placed.`
   );
-  // Return to product list
   showList();
 };
 

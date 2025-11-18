@@ -63,10 +63,8 @@ const handleSubmit = () => {
       orderDate: new Date().toISOString(),
     };
 
-    // Emit complete event with order data
     emit("complete", orderData);
 
-    // Reset form
     customerName.value = "";
     address.value = "";
     phoneNumber.value = "";
@@ -105,7 +103,6 @@ const handleSubmit = () => {
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Customer Information Form -->
         <div class="lg:col-span-2">
           <div
             class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
@@ -245,7 +242,6 @@ const handleSubmit = () => {
         </div>
       </div>
 
-      <!-- Order Summary -->
       <div class="bg-white rounded-lg p-6 shadow">
         <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
 

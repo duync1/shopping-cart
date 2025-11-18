@@ -7,7 +7,6 @@ import Search from "../components/Search.vue";
 import Sort from "../components/Sort.vue";
 import { ProductStoreKey, type Product } from "../types";
 
-// Inject products store from App
 const productStore = inject(ProductStoreKey);
 if (!productStore) {
   throw new Error("ProductStore not provided!");
@@ -15,20 +14,17 @@ if (!productStore) {
 
 const { products, addProduct, updateProduct, deleteProduct } = productStore;
 
-// UI state for search and sort (used to adjust layout + provide basic filtering)
 const searchText = ref("");
 const sortOption = ref("default");
 
 const displayedProducts = computed(() => {
   let list = products.value.slice();
 
-  // filter
   if (searchText.value.trim()) {
     const q = searchText.value.trim().toLowerCase();
     list = list.filter((p) => p.name.toLowerCase().includes(q));
   }
 
-  // sort
   switch (sortOption.value) {
     case "name_asc":
       list.sort((a, b) => a.name.localeCompare(b.name));
@@ -54,7 +50,6 @@ const mode = ref<"add" | "edit">("add");
 const selectedProduct = ref<Product | undefined>(undefined);
 const emit = defineEmits<{ (e: "view", product: Product): void }>();
 
-// Delete confirmation state
 const showDeleteConfirm = ref(false);
 const productToDelete = ref<Product | null>(null);
 
@@ -100,7 +95,6 @@ const handleSave = (product: Product) => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="flex flex-col md:flex-row gap-6">
-      <!-- Sort block on the left -->
       <aside class="w-full md:w-64">
         <div
           class="rounded-xl p-5 bg-white shadow-lg border border-gray-100 sticky top-6"
@@ -114,10 +108,8 @@ const handleSave = (product: Product) => {
         </div>
       </aside>
 
-      <!-- Main block: title, search, add button, and product list grouped together -->
       <main class="flex-1">
         <div class="rounded-xl p-8 bg-white shadow-lg border border-gray-100">
-          <!-- Header with gradient -->
           <div
             class="bg-gradient-to-r from-green-500 to-emerald-600 -mx-8 -mt-8 mb-6 rounded-t-xl p-6"
           >
@@ -147,12 +139,10 @@ const handleSave = (product: Product) => {
             </div>
           </div>
 
-          <!-- Search bar -->
           <div class="mb-6">
             <Search @search="(v) => (searchText = v)" />
           </div>
 
-          <!-- Products grid -->
           <div
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
@@ -166,7 +156,6 @@ const handleSave = (product: Product) => {
             />
           </div>
 
-          <!-- Empty state -->
           <div v-if="displayedProducts.length === 0" class="text-center py-16">
             <svg
               class="w-24 h-24 mx-auto text-gray-300 mb-4"
