@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, inject } from "vue";
-import Modal from "../components/Modal.vue";
-import ConfirmModal from "../components/ConfirmModal.vue";
+import Modal from "../components/AddOrEditModal.vue";
+import ConfirmModal from "../components/DeleteModal.vue";
 import ProductCard from "../components/ProductCard.vue";
 import Search from "../components/Search.vue";
 import Sort from "../components/Sort.vue";

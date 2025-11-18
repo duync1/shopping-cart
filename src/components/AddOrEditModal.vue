@@ -25,6 +25,12 @@ const localProduct = ref<Product>({
   description: props.product?.description ?? "",
 });
 
+const errors = ref({
+  name: "",
+  price: "",
+  image: "",
+});
+
 watch(
   () => props.product,
   (newVal) => {
@@ -39,13 +45,38 @@ watch(
         description: "",
       };
     }
+    errors.value = { name: "", price: "", image: "" };
   },
   { immediate: true }
 );
 
+const validateForm = (): boolean => {
+  errors.value = { name: "", price: "", image: "" };
+  let isValid = true;
+
+  if (!localProduct.value.name.trim()) {
+    errors.value.name = "Product name is required";
+    isValid = false;
+  }
+
+  if (!localProduct.value.price || localProduct.value.price <= 0) {
+    errors.value.price = "Price must be greater than 0";
+    isValid = false;
+  }
+
+  if (!localProduct.value.image.trim()) {
+    errors.value.image = "Image URL is required";
+    isValid = false;
+  }
+
+  return isValid;
+};
+
 const handleSave = () => {
-  emit("save", localProduct.value);
-  emit("close");
+  if (validateForm()) {
+    emit("save", localProduct.value);
+    emit("close");
+  }
 };
 </script>
 
@@ -122,35 +153,59 @@ const handleSave = () => {
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"
-                  >Product Name</label
+                  >Product Name <span class="text-red-500">*</span></label
                 >
                 <input
                   v-model="localProduct.name"
                   placeholder="Enter product name"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  :class="[
+                    'w-full border-2 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all',
+                    errors.name
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-200 focus:border-blue-500',
+                  ]"
                 />
+                <p v-if="errors.name" class="text-red-500 text-sm mt-1">
+                  {{ errors.name }}
+                </p>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"
-                  >Price ($)</label
+                  >Price ($) <span class="text-red-500">*</span></label
                 >
                 <input
                   v-model.number="localProduct.price"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  :class="[
+                    'w-full border-2 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all',
+                    errors.price
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-200 focus:border-blue-500',
+                  ]"
                 />
+                <p v-if="errors.price" class="text-red-500 text-sm mt-1">
+                  {{ errors.price }}
+                </p>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"
-                  >Image URL</label
+                  >Image URL <span class="text-red-500">*</span></label
                 >
                 <input
                   v-model="localProduct.image"
                   placeholder="https://example.com/image.jpg"
-                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  :class="[
+                    'w-full border-2 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all',
+                    errors.image
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-gray-200 focus:border-blue-500',
+                  ]"
                 />
+                <p v-if="errors.image" class="text-red-500 text-sm mt-1">
+                  {{ errors.image }}
+                </p>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2"

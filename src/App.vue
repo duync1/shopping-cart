@@ -29,9 +29,7 @@ const products = ref<Product[]>([
 ]);
 
 const addProduct = (product: Omit<Product, "id">) => {
-  const newId = products.value.length
-    ? Math.max(...products.value.map((p) => p.id)) + 1
-    : 1;
+  const newId = Date.now() + Math.floor(Math.random() * 1000);
   products.value.push({ ...product, id: newId });
 };
 
@@ -63,7 +61,7 @@ const updateURL = (view: string, productId?: number) => {
   }
   const url = `${window.location.pathname}?${params.toString()}`;
   window.history.pushState({ view, productId }, "", url);
-}
+};
 
 const parseURL = () => {
   const params = new URLSearchParams(window.location.search);
@@ -83,11 +81,11 @@ const parseURL = () => {
 
   currentView.value = "list";
   selectedProduct.value = null;
-}
+};
 
 const handlePopState = () => {
   parseURL();
-}
+};
 
 onMounted(() => {
   parseURL();

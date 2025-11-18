@@ -240,40 +240,65 @@ const handleSubmit = () => {
             </form>
           </div>
         </div>
-      </div>
 
-      <div class="bg-white rounded-lg p-6 shadow">
-        <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-
-        <div class="space-y-4">
-          <div class="flex gap-4">
-            <img
-              :src="productImage"
-              :alt="productName"
-              class="w-24 h-24 object-cover rounded"
-            />
-            <div class="flex-1">
-              <h3 class="font-semibold text-lg">{{ productName }}</h3>
-              <p class="text-gray-600 mt-1">Quantity: 1</p>
-            </div>
-          </div>
-
-          <div class="border-t pt-4 space-y-2">
-            <div class="flex justify-between text-lg">
-              <span>Subtotal:</span>
-              <span class="font-semibold"
-                >${{ (productPrice ?? 0).toFixed(2) }}</span
+        <div class="lg:col-span-1">
+          <div
+            class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 sticky top-8"
+          >
+            <div class="flex items-center gap-3 mb-6">
+              <div
+                class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"
               >
+                <svg
+                  class="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+              </div>
+              <h2 class="text-xl font-bold text-gray-900">Order Summary</h2>
             </div>
-            <div class="flex justify-between text-lg">
-              <span>Shipping:</span>
-              <span class="font-semibold">Free</span>
-            </div>
-            <div class="border-t pt-2 flex justify-between text-xl font-bold">
-              <span>Total:</span>
-              <span class="text-green-600"
-                >${{ (productPrice ?? 0).toFixed(2) }}</span
-              >
+
+            <div class="space-y-4">
+              <div class="flex gap-4">
+                <img
+                  :src="productImage"
+                  :alt="productName"
+                  class="w-20 h-20 object-cover rounded-lg"
+                />
+                <div class="flex-1">
+                  <h3 class="font-semibold text-base">{{ productName }}</h3>
+                  <p class="text-gray-600 text-sm mt-1">Quantity: 1</p>
+                </div>
+              </div>
+
+              <div class="border-t pt-4 space-y-3">
+                <div class="flex justify-between text-base">
+                  <span class="text-gray-600">Subtotal:</span>
+                  <span class="font-semibold text-gray-900"
+                    >${{ (productPrice ?? 0).toFixed(2) }}</span
+                  >
+                </div>
+                <div class="flex justify-between text-base">
+                  <span class="text-gray-600">Shipping:</span>
+                  <span class="font-semibold text-green-600">Free</span>
+                </div>
+                <div
+                  class="border-t pt-3 flex justify-between text-xl font-bold"
+                >
+                  <span class="text-gray-900">Total:</span>
+                  <span class="text-green-600"
+                    >${{ (productPrice ?? 0).toFixed(2) }}</span
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
