@@ -12,6 +12,7 @@ const emit = defineEmits(["search"]);
 
 const searchText = ref("");
 
+// Watch for changes in search text and emit event
 watch(searchText, (newVal) => {
   emit("search", newVal);
 });

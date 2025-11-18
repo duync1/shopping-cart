@@ -7,6 +7,7 @@ import Search from "../components/Search.vue";
 import Sort from "../components/Sort.vue";
 import { ProductStoreKey, type Product } from "../types";
 
+// Inject product store
 const productStore = inject(ProductStoreKey);
 if (!productStore) {
   throw new Error("ProductStore not provided!");
@@ -14,9 +15,11 @@ if (!productStore) {
 
 const { products, addProduct, updateProduct, deleteProduct } = productStore;
 
+// Manage search and sort
 const searchText = ref("");
 const sortOption = ref("default");
 
+// Compute displayed products based on search and sort
 const displayedProducts = computed(() => {
   let list = products.value.slice();
 
@@ -45,14 +48,17 @@ const displayedProducts = computed(() => {
   return list;
 });
 
+// Manage modal state and selected product
 const showModal = ref(false);
 const mode = ref<"add" | "edit">("add");
 const selectedProduct = ref<Product | undefined>(undefined);
 const emit = defineEmits<{ (e: "view", product: Product): void }>();
 
+// Manage delete confirmation modal state
 const showDeleteConfirm = ref(false);
 const productToDelete = ref<Product | null>(null);
 
+// Manage add/edit modal state
 const openAddModal = () => {
   mode.value = "add";
   selectedProduct.value = undefined;
@@ -65,6 +71,7 @@ const openEditModal = (product: Product) => {
   showModal.value = true;
 };
 
+// Manage delete confirmation modal state
 const openDeleteConfirm = (product: Product) => {
   productToDelete.value = product;
   showDeleteConfirm.value = true;
@@ -72,7 +79,7 @@ const openDeleteConfirm = (product: Product) => {
 
 const handleDeleteConfirm = () => {
   if (productToDelete.value) {
-    deleteProduct(productToDelete.value.id);
+    deleteProduct(productToDelete.value.id!);
     productToDelete.value = null;
   }
   showDeleteConfirm.value = false;
@@ -83,6 +90,7 @@ const handleDeleteCancel = () => {
   showDeleteConfirm.value = false;
 };
 
+// Handle save from add/edit modal
 const handleSave = (product: Product) => {
   if (mode.value === "add") {
     addProduct(product);

@@ -1,7 +1,7 @@
 import type { InjectionKey, Ref } from "vue";
 
 export interface Product {
-  id: number;
+  id?: number;
   name: string;
   price: number;
   image: string;

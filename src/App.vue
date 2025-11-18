@@ -7,6 +7,7 @@ import ProductDetail from "./pages/ProductDetail.vue";
 import Checkout from "./pages/Checkout.vue";
 import { ProductStoreKey, type Product } from "./types";
 
+// Initialize product store
 const products = ref<Product[]>([
   {
     id: 1,
@@ -28,21 +29,25 @@ const products = ref<Product[]>([
   },
 ]);
 
+// Add product
 const addProduct = (product: Omit<Product, "id">) => {
   const newId = Date.now() + Math.floor(Math.random() * 1000);
   products.value.push({ ...product, id: newId });
 };
 
+// Update product by id
 const updateProduct = (product: Product) => {
   const index = products.value.findIndex((p) => p.id === product.id);
   if (index !== -1) products.value[index] = { ...product };
 };
 
+// Delete product by id
 const deleteProduct = (id: number) => {
   const index = products.value.findIndex((p) => p.id === id);
   if (index !== -1) products.value.splice(index, 1);
 };
 
+// Provide product store
 provide(ProductStoreKey, {
   products,
   addProduct,
@@ -50,9 +55,11 @@ provide(ProductStoreKey, {
   deleteProduct,
 });
 
+// Manage current view and selected product
 const currentView = ref<"list" | "detail" | "checkout">("list");
 const selectedProduct = ref<Product | null>(null);
 
+// Clean URL routing functions
 const updateURL = (view: string, productId?: number) => {
   const params = new URLSearchParams();
   params.set("view", view);
@@ -63,6 +70,7 @@ const updateURL = (view: string, productId?: number) => {
   window.history.pushState({ view, productId }, "", url);
 };
 
+// Parse URL on load
 const parseURL = () => {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view") || "list";
@@ -83,16 +91,19 @@ const parseURL = () => {
   selectedProduct.value = null;
 };
 
+// Handle browser back/forward navigation
 const handlePopState = () => {
   parseURL();
 };
 
+// Manage browser back/forward navigation
 onMounted(() => {
   parseURL();
 
   window.addEventListener("popstate", handlePopState);
 });
 
+// Determine current component to display
 const currentComponent = computed(() => {
   switch (currentView.value) {
     case "detail":
@@ -104,18 +115,21 @@ const currentComponent = computed(() => {
   }
 });
 
+// View detail product function
 const showDetail = (product: Product) => {
   selectedProduct.value = product;
   currentView.value = "detail";
   updateURL("detail", product.id);
 };
 
+// Show list products function
 const showList = () => {
   selectedProduct.value = null;
   currentView.value = "list";
   updateURL("list");
 };
 
+// Show checkout function
 const showCheckout = () => {
   currentView.value = "checkout";
   if (selectedProduct.value) {
@@ -123,6 +137,7 @@ const showCheckout = () => {
   }
 };
 
+// Handle checkout complete
 const handleCheckoutComplete = (orderData: any) => {
   console.log("Order completed:", orderData);
   alert(
@@ -131,6 +146,7 @@ const handleCheckoutComplete = (orderData: any) => {
   showList();
 };
 
+// Handle back navigation
 const handleBack = () => {
   if (currentView.value === "checkout") {
     currentView.value = "detail";
@@ -139,6 +155,7 @@ const handleBack = () => {
   }
 };
 
+// Determine current props to pass to the component
 const currentProps = computed(() => {
   if (currentView.value === "detail") {
     if (!selectedProduct.value) return {};

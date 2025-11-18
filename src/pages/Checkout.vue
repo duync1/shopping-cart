@@ -21,6 +21,7 @@ const errors = ref({
   phone: "",
 });
 
+// Validate form inputs
 const validateForm = (): boolean => {
   let isValid = true;
   errors.value = { name: "", address: "", phone: "" };
@@ -46,6 +47,7 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
+// Handle form submission
 const handleSubmit = () => {
   if (validateForm()) {
     const orderData = {

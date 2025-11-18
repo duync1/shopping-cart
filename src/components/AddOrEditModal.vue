@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, defineEmits, defineProps } from "vue";
-
-interface Product {
-  id?: number;
-  name: string;
-  price: number;
-  image: string;
-  description?: string;
-}
+import type { Product } from "../types";
 
 const props = defineProps<{
   show: boolean;
@@ -17,6 +10,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["close", "save"]);
 
+// Local copy of product for form binding
 const localProduct = ref<Product>({
   id: props.product?.id ?? undefined,
   name: props.product?.name ?? "",
@@ -25,12 +19,14 @@ const localProduct = ref<Product>({
   description: props.product?.description ?? "",
 });
 
+// Form validation errors
 const errors = ref({
   name: "",
   price: "",
   image: "",
 });
 
+// Watch for changes in props.product to update localProduct
 watch(
   () => props.product,
   (newVal) => {
@@ -50,6 +46,7 @@ watch(
   { immediate: true }
 );
 
+// Validate form fields
 const validateForm = (): boolean => {
   errors.value = { name: "", price: "", image: "" };
   let isValid = true;
@@ -72,6 +69,7 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
+// Handle save button click
 const handleSave = () => {
   if (validateForm()) {
     emit("save", localProduct.value);

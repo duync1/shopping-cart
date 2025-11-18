@@ -5,6 +5,7 @@ const emit = defineEmits(["sort"]);
 
 const sortOption = ref("default");
 
+// Watch for changes in sort option and emit event
 watch(sortOption, (newVal) => {
   emit("sort", newVal);
 });
