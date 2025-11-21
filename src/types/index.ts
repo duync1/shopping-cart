@@ -1,5 +1,3 @@
-import type { InjectionKey, Ref } from "vue";
-
 export interface Product {
   id?: number;
   name: string;
@@ -8,12 +6,9 @@ export interface Product {
   description?: string;
 }
 
-export interface ProductStore {
-  products: Ref<Product[]>;
-  addProduct: (product: Omit<Product, "id">) => void;
-  updateProduct: (product: Product) => void;
-  deleteProduct: (id: number) => void;
+export interface User {
+  id?: number;
+  username: string;
+  fullname: string;
+  password: string;
 }
-
-export const ProductStoreKey: InjectionKey<ProductStore> =
-  Symbol("ProductStore");
