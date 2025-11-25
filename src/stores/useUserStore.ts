@@ -1,49 +1,65 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { User } from "../types";
+import { auth, db } from "../firebase/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-export const useUserStore = defineStore("user", () => {
-  const listUsers = ref<User[]>([]);
-  const currentUser = ref<User | null>(null);
-  const isLoggedIn = ref<boolean>(false);
+export const useUserStore = defineStore(
+  "user",
+  () => {
+    const currentUser = ref<User | null>(null);
+    const isLoggedIn = ref(false);
 
-  const register = (newUser: User) => {
-    listUsers.value.push(newUser);
-  };
+    const register = async (newUser: User) => {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
+      const fbUser = userCredential.user;
 
-  const findUserByUsername = (username: string): User | undefined => {
-    return listUsers.value.find((u) => u.username === username);
-  };
+      await setDoc(doc(db, "users", fbUser.uid), {
+        email: newUser.email,
+        fullname: newUser.fullname,
+        createdAt: new Date(),
+      });
+    };
 
-  const login = (userData: { username: string; password: string }) => {
-    const user = findUserByUsername(userData.username);
-    if (user && user.password === userData.password) {
-      currentUser.value = user;
+    const login = async (email: string, password: string) => {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const fbUser = userCredential.user;
+      const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+      currentUser.value = {
+        id: fbUser.uid,
+        email: fbUser.email!,
+        fullname: userDoc.data()?.fullname || "",
+      } as unknown as User;
+
       isLoggedIn.value = true;
-    }
-  };
+    };
 
-  const checkValidCredentials = (
-    username: string,
-    password: string
-  ): boolean => {
-    const user = findUserByUsername(username);
-    return user !== undefined && user.password === password;
-  };
+    const logout = async () => {
+      await signOut(auth);
+      currentUser.value = null;
+      isLoggedIn.value = false;
+    };
 
-  const logout = () => {
-    currentUser.value = null;
-    isLoggedIn.value = false;
-  };
-
-  return {
-    listUsers,
-    currentUser,
-    isLoggedIn,
-    register,
-    findUserByUsername,
-    login,
-    checkValidCredentials,
-    logout,
-  };
-}, { persist: true });
+    return {
+      currentUser,
+      isLoggedIn,
+      register,
+      login,
+      logout,
+    };
+  },
+  { persist: true }
+);

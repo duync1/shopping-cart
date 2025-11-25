@@ -9,10 +9,14 @@ const toast = useToast();
 const userStore = useUserStore();
 const { currentUser } = storeToRefs(userStore);
 const { logout } = userStore;
-const handleLogout = () => {
-  logout();
-  router.push({ name: "Login" });
-  toast.success("Logged out successfully!");
+const handleLogout = async () => {
+  try {
+    await logout();
+    router.push({ name: "Login" });
+    toast.success("Logged out successfully!");
+  } catch (error) {
+    toast.error("Failed to log out. Please try again.");
+  }
 };
 </script>
 
@@ -80,7 +84,7 @@ const handleLogout = () => {
               <span
                 class="text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
               >
-                {{ currentUser?.fullname || currentUser?.username }}
+                {{ currentUser?.fullname || currentUser?.email }}
               </span>
             </div>
           </div>

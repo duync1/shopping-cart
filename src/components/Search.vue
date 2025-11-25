@@ -6,16 +6,28 @@ const props = defineProps({
     type: String,
     default: "Search products...",
   },
+  modelValue: {
+    type: String,
+    default: "",
+  },
 });
 
 const emit = defineEmits(["search"]);
 
-const searchText = ref("");
+const searchText = ref(props.modelValue);
 
 // Watch for changes in search text and emit event
 watch(searchText, (newVal) => {
   emit("search", newVal);
 });
+
+// Watch for external changes to modelValue
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    searchText.value = newVal;
+  }
+);
 </script>
 
 <template>

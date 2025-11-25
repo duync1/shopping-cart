@@ -6,27 +6,27 @@ import { useToast } from "vue-toastification";
 
 const router = useRouter();
 
-const username = ref("");
+const email = ref("");
 const password = ref("");
 
 const errors = ref({
-  username: "",
+  email: "",
   password: "",
 });
 
 const userStore = useUserStore();
-const { checkValidCredentials, login } = userStore;
+const { login } = userStore;
 const toast = useToast();
 
 const validateForm = (): boolean => {
-  errors.value = { username: "", password: "" };
+  errors.value = { email: "", password: "" };
   let isValid = true;
 
-  if (!username.value.trim()) {
-    errors.value.username = "Username is required";
+  if (!email.value.trim()) {
+    errors.value.email = "Email is required";
     isValid = false;
-  } else if (username.value.length < 3) {
-    errors.value.username = "Username must be at least 3 characters";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    errors.value.email = "Please enter a valid email address";
     isValid = false;
   }
 
@@ -41,14 +41,22 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (validateForm()) {
-    if (checkValidCredentials(username.value, password.value)) {
-      login({ username: username.value, password: password.value });
+    try {
+      await login(email.value, password.value);
       router.push({ name: "Home" });
       toast.success("Login successful!");
-    } else {
-      toast.error("Invalid username or password");
+    } catch (error: any) {
+      let message = "";
+      switch (error.code) {
+        case "auth/invalid-credential":
+          message = "Invalid email or password.";
+          break;
+        default:
+          message = "An error occurred during login. Please try again.";
+      }
+      toast.error(message);
     }
   }
 };
@@ -89,10 +97,10 @@ const goToRegister = () => {
       <!-- Login Form -->
       <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <form @submit.prevent="handleSubmit" class="space-y-6">
-          <!-- Username -->
+          <!-- Email -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Username <span class="text-red-500">*</span>
+              Email <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <div
@@ -108,24 +116,24 @@ const goToRegister = () => {
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                   />
                 </svg>
               </div>
               <input
-                v-model="username"
+                v-model="email"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
                 :class="[
                   'w-full border-2 rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all',
-                  errors.username
+                  errors.email
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-200 focus:border-blue-500',
                 ]"
               />
             </div>
             <p
-              v-if="errors.username"
+              v-if="errors.email"
               class="text-red-500 text-sm mt-2 flex items-center gap-1"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +143,7 @@ const goToRegister = () => {
                   clip-rule="evenodd"
                 />
               </svg>
-              {{ errors.username }}
+              {{ errors.email }}
             </p>
           </div>
 

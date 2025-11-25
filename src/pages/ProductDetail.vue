@@ -1,27 +1,23 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import Header from "../components/Header.vue";
 import { useProductStore } from "../stores/useProductStore";
-import { storeToRefs } from "pinia";
+import type { Product } from "../types";
 
 // Router
 const router = useRouter();
 const route = useRoute();
 
 const productStore = useProductStore();
-const { products } = storeToRefs(productStore);
+const { fetchProductById } = productStore;
+
+const product = ref<Product | null>(null);
+const loading = ref(true);
 
 // Get product from route params
-const product = computed(() => {
-  const id = parseInt(route.params.id as string);
-  return products.value.find((p) => p.id === id);
-});
+const productId = computed(() => route.params.id as string);
 
-// Navigate back to list
-const goBack = () => {
-  router.push({ name: "Home" });
-};
 
 // Navigate to checkout
 const goToCheckout = () => {
@@ -32,35 +28,70 @@ const goToCheckout = () => {
     });
   }
 };
+
+onMounted(async () => {
+  try {
+    loading.value = true;
+    product.value = await fetchProductById(productId.value);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
   <div>
     <Header />
+    <!-- Loading Skeleton -->
     <div
-      v-if="product"
+      v-if="loading"
       class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
     >
       <div class="max-w-6xl mx-auto">
-        <button
-          class="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium mb-6 transition-colors group"
-          @click="goBack"
+        <div class="h-6 w-32 bg-gray-300 rounded animate-pulse mb-6"></div>
+        <div
+          class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
         >
-          <svg
-            class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to catalog
-        </button>
+          <div class="grid md:grid-cols-2 gap-0">
+            <div
+              class="relative bg-gradient-to-br from-gray-100 to-gray-200 p-8 flex items-center justify-center"
+            >
+              <div
+                class="w-full max-w-md h-96 bg-gray-300 rounded-2xl animate-pulse"
+              ></div>
+            </div>
+            <div class="p-8 md:p-12 flex flex-col justify-center space-y-4">
+              <div class="h-4 w-24 bg-gray-300 rounded animate-pulse"></div>
+              <div class="h-10 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+              <div class="space-y-2">
+                <div class="h-4 w-full bg-gray-300 rounded animate-pulse"></div>
+                <div class="h-4 w-5/6 bg-gray-300 rounded animate-pulse"></div>
+                <div class="h-4 w-4/6 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+              <div
+                class="h-16 w-full bg-gray-300 rounded animate-pulse mt-6"
+              ></div>
+              <div class="space-y-3 mt-8">
+                <div class="h-6 w-full bg-gray-300 rounded animate-pulse"></div>
+                <div class="h-6 w-full bg-gray-300 rounded animate-pulse"></div>
+                <div class="h-6 w-full bg-gray-300 rounded animate-pulse"></div>
+              </div>
+              <div
+                class="h-14 w-full bg-gray-300 rounded-xl animate-pulse mt-8"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Product Content -->
+    <div
+      v-else-if="product"
+      class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
+    >
+      <div class="max-w-6xl mx-auto">
 
         <div
           class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
@@ -175,15 +206,13 @@ const goToCheckout = () => {
         </div>
       </div>
     </div>
-    <div v-else class="min-h-screen flex items-center justify-center">
+    <!-- Product Not Found -->
+    <div
+      v-else-if="!loading"
+      class="min-h-screen flex items-center justify-center"
+    >
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
-        <button
-          @click="goBack"
-          class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
-        >
-          Back to catalog
-        </button>
       </div>
     </div>
   </div>

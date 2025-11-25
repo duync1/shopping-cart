@@ -7,25 +7,25 @@ import { useToast } from "vue-toastification";
 const router = useRouter();
 
 const fullname = ref("");
-const username = ref("");
+const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 
 const errors = ref({
   fullname: "",
-  username: "",
+  email: "",
   password: "",
   confirmPassword: "",
 });
 
 const userStore = useUserStore();
-const { register, findUserByUsername } = userStore;
+const { register } = userStore;
 const toast = useToast();
 
 const validateForm = (): boolean => {
   errors.value = {
     fullname: "",
-    username: "",
+    email: "",
     password: "",
     confirmPassword: "",
   };
@@ -40,16 +40,12 @@ const validateForm = (): boolean => {
     isValid = false;
   }
 
-  // Validate username
-  if (!username.value.trim()) {
-    errors.value.username = "Username is required";
+  // Validate email
+  if (!email.value.trim()) {
+    errors.value.email = "Email is required";
     isValid = false;
-  } else if (username.value.length < 3) {
-    errors.value.username = "Username must be at least 3 characters";
-    isValid = false;
-  } else if (!/^[a-zA-Z0-9_]+$/.test(username.value)) {
-    errors.value.username =
-      "Username can only contain letters, numbers, and underscores";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    errors.value.email = "Please enter a valid email address";
     isValid = false;
   }
 
@@ -78,19 +74,30 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
-const handleSubmit = () => {
-  if (validateForm()) {
-    if (findUserByUsername(username.value)) {
-      toast.error("Username already taken");
-      return;
+const handleSubmit = async () => {
+  try {
+    if (validateForm()) {
+      await register({
+        fullname: fullname.value,
+        email: email.value,
+        password: password.value,
+      });
+      router.push({ name: "Login" });
+      toast.success("Registration successful! Please log in.");
     }
-    register({
-      fullname: fullname.value,
-      username: username.value,
-      password: password.value,
-    });
-    router.push({ name: "Login" });
-    toast.success("Registration successful! Please log in.");
+  } catch (error: any) {
+    let message = "";
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        message = "This email is already registered.";
+        break;
+      case "auth/invalid-email":
+        message = "The email address is not valid.";
+        break;
+      default:
+        message = "An unexpected error occurred. Please try again.";
+    }
+    toast.error(message);
   }
 };
 
@@ -180,10 +187,10 @@ const goToLogin = () => {
             </p>
           </div>
 
-          <!-- Username -->
+          <!-- Email -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Username <span class="text-red-500">*</span>
+              Email <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <div
@@ -199,24 +206,24 @@ const goToLogin = () => {
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                   />
                 </svg>
               </div>
               <input
-                v-model="username"
+                v-model="email"
                 type="text"
-                placeholder="Choose a username"
+                placeholder="Enter your email"
                 :class="[
                   'w-full border-2 rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all',
-                  errors.username
+                  errors.email
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-200 focus:border-purple-500',
                 ]"
               />
             </div>
             <p
-              v-if="errors.username"
+              v-if="errors.email"
               class="text-red-500 text-sm mt-2 flex items-center gap-1"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -226,7 +233,7 @@ const goToLogin = () => {
                   clip-rule="evenodd"
                 />
               </svg>
-              {{ errors.username }}
+              {{ errors.email }}
             </p>
           </div>
 

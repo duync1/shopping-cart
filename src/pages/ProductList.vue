@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, watch, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import Header from "../components/Header.vue";
 import Modal from "../components/AddOrEditModal.vue";
@@ -15,44 +15,43 @@ import { useToast } from "vue-toastification";
 
 const productStore = useProductStore();
 const { products } = storeToRefs(productStore);
-const { addProduct, updateProduct, deleteProduct } = productStore;
+const { addProduct, updateProduct, deleteProduct, fetchProducts } =
+  productStore;
 
 const toast = useToast();
 
 // Router
 const router = useRouter();
+const route = useRoute();
 
-// Manage search and sort
-const searchText = ref("");
-const sortOption = ref("default");
+// Initialize from URL query params
+const searchText = ref((route.query.search as string) || "");
+const sortOption = ref((route.query.sort as string) || "default");
+const loading = ref(false);
 
-// Compute displayed products based on search and sort
-const displayedProducts = computed(() => {
-  let list = products.value.slice();
+// Update URL when search or sort changes
+const updateURL = (search: string, sort: string) => {
+  const query: Record<string, string> = {};
+  if (search) query.search = search;
+  if (sort && sort !== "default") query.sort = sort;
 
-  if (searchText.value.trim()) {
-    const q = searchText.value.trim().toLowerCase();
-    list = list.filter((p) => p.name.toLowerCase().includes(q));
+  router.replace({ query });
+};
+
+// Watch for search and sort changes
+watch([searchText, sortOption], async ([newSearch, newSort]) => {
+  loading.value = true;
+  try {
+    // Update URL
+    updateURL(newSearch, newSort);
+
+    // Fetch products
+    await fetchProducts(newSearch, newSort);
+  } catch (error) {
+    toast.error("Failed to fetch products. Please try again.");
+  } finally {
+    loading.value = false;
   }
-
-  switch (sortOption.value) {
-    case "name_asc":
-      list.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "name_desc":
-      list.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    case "price_asc":
-      list.sort((a, b) => a.price - b.price);
-      break;
-    case "price_desc":
-      list.sort((a, b) => b.price - a.price);
-      break;
-    default:
-      break;
-  }
-
-  return list;
 });
 
 // Manage modal state and selected product
@@ -94,11 +93,16 @@ const openDeleteConfirm = (product: Product) => {
 };
 
 const handleDeleteConfirm = () => {
-  if (productToDelete.value) {
-    deleteProduct(productToDelete.value.id!);
-    productToDelete.value = null;
-    toast.success("Product deleted successfully!");
+  try {
+    if (productToDelete.value) {
+      deleteProduct(productToDelete.value.id!);
+      productToDelete.value = null;
+      toast.success("Product deleted successfully!");
+    }
+  } catch (error: any) {
+    toast.error("Failed to delete product. Please try again." + error.code);
   }
+
   showDeleteConfirm.value = false;
 };
 
@@ -108,18 +112,32 @@ const handleDeleteCancel = () => {
 };
 
 // Handle save from add/edit modal
-const handleSave = (product: Product) => {
-  if (mode.value === "add") {
-    const { id, ...productData } = product;
-    console.log(id);
-    addProduct(productData);
-    toast.success("Product added successfully!");
-  } else {
-    updateProduct(product);
-    toast.success("Product updated successfully!");
+const handleSave = async (product: Product) => {
+  try {
+    if (mode.value === "add") {
+      const { id, ...productData } = product;
+      await addProduct(productData);
+      toast.success("Product added successfully!");
+    } else {
+      await updateProduct(product);
+      toast.success("Product updated successfully!");
+    }
+  } catch (error: any) {
+    toast.error("Operation failed. Please try again." + error.code);
+    console.log(error);
   }
+
   showModal.value = false;
 };
+
+onMounted(async () => {
+  try {
+    // Fetch products with initial URL params
+    await fetchProducts(searchText.value, sortOption.value);
+  } catch (error) {
+    toast.error("Failed to fetch products. Please try again later.");
+  }
+});
 </script>
 
 <template>
@@ -137,7 +155,7 @@ const handleSave = (product: Product) => {
               >
                 Filter & Sort
               </h3>
-              <Sort @sort="(v) => (sortOption = v)" />
+              <Sort :modelValue="sortOption" @sort="(v) => (sortOption = v)" />
             </div>
           </aside>
 
@@ -175,14 +193,36 @@ const handleSave = (product: Product) => {
               </div>
 
               <div class="mb-6">
-                <Search @search="(v) => (searchText = v)" />
+                <Search
+                  :modelValue="searchText"
+                  @search="(v) => (searchText = v)"
+                />
+              </div>
+
+              <!-- Loading skeleton -->
+              <div
+                v-if="loading"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                <div
+                  v-for="i in 8"
+                  :key="i"
+                  class="bg-white rounded-lg shadow-md overflow-hidden animate-pulse"
+                >
+                  <div class="w-full h-48 bg-gray-300"></div>
+                  <div class="p-4">
+                    <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                </div>
               </div>
 
               <div
+                v-else
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               >
                 <ProductCard
-                  v-for="p in displayedProducts"
+                  v-for="p in products"
                   :key="p.id"
                   :product="p"
                   @view="viewProduct"
@@ -192,7 +232,7 @@ const handleSave = (product: Product) => {
               </div>
 
               <div
-                v-if="displayedProducts.length === 0"
+                v-if="!loading && products.length === 0"
                 class="text-center py-16"
               >
                 <svg

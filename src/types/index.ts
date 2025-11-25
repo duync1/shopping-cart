@@ -4,11 +4,13 @@ export interface Product {
   price: number;
   image: string;
   description?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface User {
   id?: number;
-  username: string;
+  email: string;
   fullname: string;
   password: string;
 }

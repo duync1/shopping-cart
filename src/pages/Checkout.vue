@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import Header from "../components/Header.vue";
 import { useUserStore } from "../stores/useUserStore";
 import { useProductStore } from "../stores/useProductStore";
 import { storeToRefs } from "pinia";
 import { useToast } from "vue-toastification";
+import type { Product } from "../types";
 
 // Router
 const router = useRouter();
 const route = useRoute();
 
 const productStore = useProductStore();
-const { products } = storeToRefs(productStore);
+const { fetchProductById } = productStore;
 
-// Get product from route params
-const product = computed(() => {
-  const id = parseInt(route.params.id as string);
-  return products.value.find((p) => p.id === id);
-});
+const product = ref<Product | null>(null);
+const loading = ref(true);
+
+// Get product id from route params
+const productId = computed(() => route.params.id as string);
 
 const userStore = useUserStore();
 const { currentUser } = storeToRefs(userStore);
@@ -63,18 +64,6 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
-// Navigate back to product detail
-const goBack = () => {
-  if (product.value?.id) {
-    router.push({
-      name: "ProductDetails",
-      params: { id: product.value.id.toString() },
-    });
-  } else {
-    router.push({ name: "Home" });
-  }
-};
-
 // Handle form submission
 const handleSubmit = () => {
   if (validateForm()) {
@@ -104,36 +93,111 @@ const handleSubmit = () => {
     router.push({ name: "Home" });
   }
 };
+
+onMounted(async () => {
+  try {
+    loading.value = true;
+    product.value = await fetchProductById(productId.value);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
   <div>
     <Header />
+    <!-- Loading Skeleton -->
     <div
-      v-if="product"
+      v-if="loading"
       class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
     >
       <div class="max-w-6xl mx-auto">
-        <button
-          class="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium mb-6 transition-colors group"
-          @click="goBack"
-        >
-          <svg
-            class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to product
-        </button>
-
+        <div class="h-6 w-32 bg-gray-300 rounded animate-pulse mb-6"></div>
+        <div class="mb-8">
+          <div class="h-10 w-48 bg-gray-300 rounded animate-pulse mb-2"></div>
+          <div class="h-4 w-64 bg-gray-300 rounded animate-pulse"></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2">
+            <div
+              class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
+            >
+              <div
+                class="h-8 w-64 bg-gray-300 rounded animate-pulse mb-6"
+              ></div>
+              <div class="space-y-6">
+                <div class="space-y-2">
+                  <div class="h-4 w-24 bg-gray-300 rounded animate-pulse"></div>
+                  <div
+                    class="h-12 w-full bg-gray-300 rounded-xl animate-pulse"
+                  ></div>
+                </div>
+                <div class="space-y-2">
+                  <div class="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
+                  <div
+                    class="h-24 w-full bg-gray-300 rounded-xl animate-pulse"
+                  ></div>
+                </div>
+                <div class="space-y-2">
+                  <div class="h-4 w-28 bg-gray-300 rounded animate-pulse"></div>
+                  <div
+                    class="h-12 w-full bg-gray-300 rounded-xl animate-pulse"
+                  ></div>
+                </div>
+                <div
+                  class="h-14 w-full bg-gray-300 rounded-xl animate-pulse mt-6"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-1">
+            <div
+              class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            >
+              <div
+                class="h-6 w-32 bg-gray-300 rounded animate-pulse mb-6"
+              ></div>
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div
+                    class="w-20 h-20 bg-gray-300 rounded-lg animate-pulse"
+                  ></div>
+                  <div class="flex-1 space-y-2">
+                    <div
+                      class="h-4 w-full bg-gray-300 rounded animate-pulse"
+                    ></div>
+                    <div
+                      class="h-3 w-20 bg-gray-300 rounded animate-pulse"
+                    ></div>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-4">
+                  <div
+                    class="h-4 w-full bg-gray-300 rounded animate-pulse"
+                  ></div>
+                  <div
+                    class="h-4 w-full bg-gray-300 rounded animate-pulse"
+                  ></div>
+                  <div
+                    class="h-6 w-full bg-gray-300 rounded animate-pulse"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Checkout Content -->
+    <div
+      v-else-if="product"
+      class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
+    >
+      <div class="max-w-6xl mx-auto">
+      
         <div class="mb-8">
           <h1 class="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p class="text-gray-600">Complete your order in just a few steps</p>
@@ -354,7 +418,11 @@ const handleSubmit = () => {
         </div>
       </div>
     </div>
-    <div v-else class="min-h-screen flex items-center justify-center">
+    <!-- Product Not Found -->
+    <div
+      v-else-if="!loading"
+      class="min-h-screen flex items-center justify-center"
+    >
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
         <button
