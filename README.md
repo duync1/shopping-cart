@@ -1,5 +1,54 @@
-# Vue 3 + TypeScript + Vite
+# 🛒 Shopping Cart Application
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A modern shopping cart application built with Vue 3, TypeScript, and Tailwind CSS.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 📋 Prerequisites
+
+- **Node.js**: `>= 18.0.0`
+- **npm**: `>= 9.0.0`
+
+Check your versions:
+
+```bash
+node --version
+npm --version
+```
+
+## 🚀 Setup
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd shopping-cart
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Run development server
+
+```bash
+npm run dev
+```
+
+The application will start at `http://localhost:5173/`
+
+### 4. Build for production
+
+```bash
+npm run build
+```
+
+### 5. Preview production build
+
+```bash
+npm run preview
+```
+
+## 📝 Note
+
+> **Important**: This project requires Node.js version 18 or higher due to Vite 7 requirements.
