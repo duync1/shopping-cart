@@ -18,10 +18,6 @@ const product = computed(() => {
   return products.value.find((p) => p.id === id);
 });
 
-// Navigate back to list
-const goBack = () => {
-  router.push({ name: "Home" });
-};
 
 // Navigate to checkout
 const goToCheckout = () => {
@@ -42,26 +38,6 @@ const goToCheckout = () => {
       class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
     >
       <div class="max-w-6xl mx-auto">
-        <button
-          class="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium mb-6 transition-colors group"
-          @click="goBack"
-        >
-          <svg
-            class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to catalog
-        </button>
-
         <div
           class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
         >
@@ -178,12 +154,9 @@ const goToCheckout = () => {
     <div v-else class="min-h-screen flex items-center justify-center">
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
-        <button
-          @click="goBack"
-          class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
-        >
-          Back to catalog
-        </button>
+        <p class="text-gray-600 mb-6">
+          The product you are looking for does not exist.
+        </p>
       </div>
     </div>
   </div>

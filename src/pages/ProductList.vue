@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import Header from "../components/Header.vue";
 import Modal from "../components/AddOrEditModal.vue";
@@ -21,10 +21,26 @@ const toast = useToast();
 
 // Router
 const router = useRouter();
+const route = useRoute();
 
-// Manage search and sort
-const searchText = ref("");
-const sortOption = ref("default");
+// Initialize from URL query params
+const searchText = ref((route.query.search as string) || "");
+const sortOption = ref((route.query.sort as string) || "default");
+
+// Update URL when search or sort changes
+const updateURL = () => {
+  const query: Record<string, string> = {};
+  if (searchText.value) query.search = searchText.value;
+  if (sortOption.value && sortOption.value !== "default")
+    query.sort = sortOption.value;
+
+  router.replace({ query });
+};
+
+// Watch for changes and update URL
+watch([searchText, sortOption], () => {
+  updateURL();
+});
 
 // Compute displayed products based on search and sort
 const displayedProducts = computed(() => {
@@ -137,7 +153,7 @@ const handleSave = (product: Product) => {
               >
                 Filter & Sort
               </h3>
-              <Sort @sort="(v) => (sortOption = v)" />
+              <Sort :modelValue="sortOption" @sort="(v) => (sortOption = v)" />
             </div>
           </aside>
 
@@ -175,7 +191,10 @@ const handleSave = (product: Product) => {
               </div>
 
               <div class="mb-6">
-                <Search @search="(v) => (searchText = v)" />
+                <Search
+                  :modelValue="searchText"
+                  @search="(v) => (searchText = v)"
+                />
               </div>
 
               <div

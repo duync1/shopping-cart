@@ -1,14 +1,29 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: "default",
+  },
+});
+
 const emit = defineEmits(["sort"]);
 
-const sortOption = ref("default");
+const sortOption = ref(props.modelValue);
 
 // Watch for changes in sort option and emit event
 watch(sortOption, (newVal) => {
   emit("sort", newVal);
 });
+
+// Watch for external changes to modelValue
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    sortOption.value = newVal;
+  }
+);
 </script>
 
 <template>

@@ -63,18 +63,6 @@ const validateForm = (): boolean => {
   return isValid;
 };
 
-// Navigate back to product detail
-const goBack = () => {
-  if (product.value?.id) {
-    router.push({
-      name: "ProductDetails",
-      params: { id: product.value.id.toString() },
-    });
-  } else {
-    router.push({ name: "Home" });
-  }
-};
-
 // Handle form submission
 const handleSubmit = () => {
   if (validateForm()) {
@@ -114,26 +102,6 @@ const handleSubmit = () => {
       class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
     >
       <div class="max-w-6xl mx-auto">
-        <button
-          class="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium mb-6 transition-colors group"
-          @click="goBack"
-        >
-          <svg
-            class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to product
-        </button>
-
         <div class="mb-8">
           <h1 class="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p class="text-gray-600">Complete your order in just a few steps</p>
