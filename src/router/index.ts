@@ -52,21 +52,21 @@ export const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const publicPages = ["/login", "/register"];
-  const authRequired = !publicPages.includes(to.path);
   const user = useUserStore();
 
-  if (authRequired && !user.isLoggedIn) {
-    next("/login");
-  } else {
-    next();
+  const isPublic = publicPages.includes(to.path);
+
+  if (!isPublic && !user.isLoggedIn) {
+    return next("/login");
   }
+
+  if (user.isLoggedIn && isPublic) {
+    return next("/");
+  }
+
+  next();
 });
 
-router.afterEach((to, from) => {
+router.afterEach(() => {
   window.scrollTo(0, 0);
-  const userStore = useUserStore();
-  const { isLoggedIn } = userStore;
-  if (isLoggedIn && (to.path === "/login" || to.path === "/register")) {
-    router.push("/");
-  }
 });
