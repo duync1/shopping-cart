@@ -9,6 +9,7 @@ import Checkout from "../pages/Checkout.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import { useUserStore } from "../stores/useUserStore";
+import { storeToRefs } from "pinia";
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -53,14 +54,15 @@ export const router = createRouter({
 router.beforeEach((to, from, next) => {
   const publicPages = ["/login", "/register"];
   const user = useUserStore();
+  const { isLoggedIn } = storeToRefs(user);
 
   const isPublic = publicPages.includes(to.path);
 
-  if (!isPublic && !user.isLoggedIn) {
+  if (!isPublic && !isLoggedIn.value) {
     return next("/login");
   }
 
-  if (user.isLoggedIn && isPublic) {
+  if (isLoggedIn.value && isPublic) {
     return next("/");
   }
 
