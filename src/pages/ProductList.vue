@@ -131,11 +131,14 @@ const handleSave = async (product: Product) => {
 };
 
 onMounted(async () => {
+  loading.value = true;
   try {
     // Fetch products with initial URL params
     await fetchProducts(searchText.value, sortOption.value);
   } catch (error) {
     toast.error("Failed to fetch products. Please try again later.");
+  } finally {
+    loading.value = false;
   }
 });
 </script>
