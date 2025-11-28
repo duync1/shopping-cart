@@ -11,8 +11,6 @@ import Register from "../pages/Register.vue";
 import { useUserStore } from "../stores/useUserStore";
 import { storeToRefs } from "pinia";
 
-const user = useUserStore();
-
 export const routes: RouteRecordRaw[] = [
   {
     path: "/",
@@ -55,16 +53,16 @@ export const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const publicPages = ["/login", "/register"];
-  
+  const user = useUserStore();
   const { isLoggedIn } = storeToRefs(user);
 
   const isPublic = publicPages.includes(to.path);
 
-  if (!isPublic && !isLoggedIn) {
+  if (!isPublic && !isLoggedIn.value) {
     return next("/login");
   }
 
-  if (isLoggedIn && isPublic) {
+  if (isLoggedIn.value && isPublic) {
     return next("/");
   }
 
